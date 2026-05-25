@@ -9,7 +9,7 @@ import gpxpy
 
 from gpx_standardiser.description_hints import description_hint_from_original
 from gpx_standardiser.gpx_stats import TrackMetrics, compute_track_metrics
-from gpx_standardiser.naming import DESCRIPTION_MARKER, format_stem, format_stats_prefix
+from gpx_standardiser.naming import DESCRIPTION_MARKER, format_stats_prefix, format_stem
 from gpx_standardiser.units import OutputUnits
 
 

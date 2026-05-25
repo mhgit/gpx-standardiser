@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 KM_PER_MILE = 1.609344
 M_PER_FOOT = 0.3048
 
 
-class OutputUnits(str, Enum):
+class OutputUnits(StrEnum):
     """Filename and CLI display units."""
 
     IMPERIAL = "imperial"
