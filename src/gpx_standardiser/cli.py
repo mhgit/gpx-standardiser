@@ -16,6 +16,7 @@ from gpx_standardiser.naming import (
 )
 from gpx_standardiser.rename import plan_row as build_plan_row
 from gpx_standardiser.rename import write_renamed_copy
+from gpx_standardiser.units import OutputUnits, metrics_headline
 
 ConfigPathOption = Annotated[
     Path | None,
@@ -36,7 +37,17 @@ ConfigPathOption = Annotated[
 ]
 
 
-_APP_HELP = """Standardise GPX basenames to "<km>km-<ascent>m@<desc>.gpx" (see docs/adr/)."""
+UnitsOption = Annotated[
+    OutputUnits,
+    typer.Option(
+        "--units",
+        case_sensitive=False,
+        help="Output units for distance and ascent in filenames and prompts (default: imperial).",
+    ),
+]
+
+
+_APP_HELP = """Standardise GPX basenames to "<dist>-<ascent>@<desc>.gpx" (see docs/adr/)."""
 
 _APP_EPILOG = """\
 Use `plan --interactive` (-i) to walk the same prompts as `rename`, then print a report (nothing written).
@@ -123,6 +134,7 @@ def plan(
         ),
     ),
     config_file: ConfigPathOption = None,
+    units: UnitsOption = OutputUnits.IMPERIAL,
 ) -> None:
     """Print distance, ascent, and filename hints — no writes."""
 
@@ -159,6 +171,7 @@ def plan(
                 metrics.ascent_m,
                 path,
                 hint,
+                units=units,
             )
             if picked is None:
                 typer.echo("[skip] blank choice - untouched.")
@@ -166,7 +179,7 @@ def plan(
                 n_skip += 1
                 continue
 
-            stem = format_stem(metrics.distance_km, metrics.ascent_m, picked)
+            stem = format_stem(metrics.distance_km, metrics.ascent_m, picked, units=units)
             outfile = allocate_unique_gpx_basename(
                 Path("."),
                 stem,
@@ -196,7 +209,7 @@ def plan(
     for path in paths:
         try:
             xml = path.read_text(encoding="utf-8")
-            row = build_plan_row(path, xml, config_file=config_file)
+            row = build_plan_row(path, xml, config_file=config_file, units=units)
         except GpxAnalysisError as exc:
             typer.echo(f"{path.name}: ERROR: {exc}")
             continue
@@ -212,10 +225,17 @@ def _friendly_dest_message(dest_abs: Path) -> str:
         return str(dest_abs.resolve())
 
 
-def _prompt_until_valid_stem(distance_km: int, ascent_m: int, path: Path, hint: str) -> str | None:
+def _prompt_until_valid_stem(
+    distance_km: int,
+    ascent_m: int,
+    path: Path,
+    hint: str,
+    *,
+    units: OutputUnits,
+) -> str | None:
     """Interactive loop returning a valid description string, or ``None`` to skip file."""
 
-    headline = f'Description for "{path.name}" [{distance_km} km - {ascent_m} m climb]'
+    headline = f'Description for "{path.name}" [{metrics_headline(distance_km, ascent_m, units)}]'
 
     hint_default = hint or ""
     while True:
@@ -232,7 +252,7 @@ def _prompt_until_valid_stem(distance_km: int, ascent_m: int, path: Path, hint: 
             return None
 
         try:
-            format_stem(distance_km, ascent_m, trimmed)
+            format_stem(distance_km, ascent_m, trimmed, units=units)
         except NamingError as exc:
             typer.echo(f"Try again: {exc}")
             hint_default = trimmed
@@ -298,6 +318,7 @@ def rename(
         ),
     ),
     config_file: ConfigPathOption = None,
+    units: UnitsOption = OutputUnits.IMPERIAL,
 ) -> None:
     """Copy GPX files using the ADR basename pattern and refreshed `<name>` metadata."""
     paths = resolve_input_paths(route_files, gpx_file)
@@ -333,7 +354,7 @@ def rename(
 
         if desc is not None:
             try:
-                format_stem(metrics.distance_km, metrics.ascent_m, desc.strip())
+                format_stem(metrics.distance_km, metrics.ascent_m, desc.strip(), units=units)
             except NamingError as exc:
                 typer.echo(f"[error] `--desc`: {exc}")
                 raise typer.Exit(code=1) from exc
@@ -343,7 +364,13 @@ def rename(
             skipped += 1
             continue
         else:
-            picked = _prompt_until_valid_stem(metrics.distance_km, metrics.ascent_m, path, hint)
+            picked = _prompt_until_valid_stem(
+                metrics.distance_km,
+                metrics.ascent_m,
+                path,
+                hint,
+                units=units,
+            )
             if picked is None:
                 typer.echo("[skip] blank choice - untouched.")
                 skipped += 1
@@ -351,7 +378,7 @@ def rename(
             chosen_desc = picked
 
         assert chosen_desc is not None
-        stem = format_stem(metrics.distance_km, metrics.ascent_m, chosen_desc)
+        stem = format_stem(metrics.distance_km, metrics.ascent_m, chosen_desc, units=units)
         canonical_name = f"{stem}.gpx"
         outfile = allocate_unique_gpx_basename(
             dest_root,

@@ -42,3 +42,15 @@ def test_plan_interactive_blank_skips_and_reports(tmp_path: Path) -> None:
     assert "SKIPPED (blank)" in out
     assert "Would rename: 0" in out
     assert "skipped: 1" in out
+
+
+def test_plan_metric_units_in_stem(tmp_path: Path) -> None:
+    gpx_txt = track_xml_simple([(0.01, -0.01, 101.0), (0.02, -0.02, 105.5)])
+    gp = tmp_path / "107km-547m@Legacy.gpx"
+    gp.write_text(gpx_txt, encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["plan", "--units", "metric", str(gp)])
+    assert result.exit_code == 0, result.stdout + (result.stderr or "")
+    assert "km-" in result.stdout
+    assert "mls-" not in result.stdout

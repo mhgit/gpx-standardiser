@@ -4,23 +4,70 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from gpx_standardiser.units import (
+    OutputUnits,
+    ascent_unit_suffix,
+    convert_for_output,
+    distance_unit_suffix,
+)
+
 # Shell-friendly separator before rider-facing description slug.
 DESCRIPTION_MARKER = "@"
+
+# Zero-pad distance so hosts that sort filenames lexicographically (e.g. Spond) list
+# rides in numeric distance order. Club rides use three digits; longer distances
+# grow naturally (1000, 1001, …) without an upper cap.
+DISTANCE_FIELD_WIDTH = 3
 
 
 class NamingError(ValueError):
     """Invalid description (or other basename rule breakage)."""
 
 
-def format_stem(distance_km: int, ascent_m: int, description: str) -> str:
+def format_distance_field(distance: int) -> str:
+    """Return a zero-padded distance token for filename prefixes."""
+
+    if distance < 0:
+        raise NamingError(f"Distance must be non-negative (got {distance}).")
+    width = max(DISTANCE_FIELD_WIDTH, len(str(distance)))
+    return f"{distance:0{width}d}"
+
+
+def format_stats_prefix(
+    distance_km: int,
+    ascent_m: int,
+    *,
+    units: OutputUnits = OutputUnits.IMPERIAL,
+) -> str:
+    """Distance + ascent segment before ``@`` (padded distance, unpadded ascent)."""
+
+    dist, ascent = convert_for_output(distance_km, ascent_m, units)
+    d_suffix = distance_unit_suffix(units)
+    a_suffix = ascent_unit_suffix(units)
+    return f"{format_distance_field(dist)}{d_suffix}-{ascent}{a_suffix}"
+
+
+def format_stem(
+    distance_km: int,
+    ascent_m: int,
+    description: str,
+    *,
+    units: OutputUnits = OutputUnits.IMPERIAL,
+) -> str:
     desc = description.strip()
     if not desc:
         raise NamingError("Description must be non-empty.")
-    return f"{distance_km}km-{ascent_m}m{DESCRIPTION_MARKER}{desc}"
+    return f"{format_stats_prefix(distance_km, ascent_m, units=units)}{DESCRIPTION_MARKER}{desc}"
 
 
-def format_filename(distance_km: int, ascent_m: int, description: str) -> str:
-    stem = format_stem(distance_km, ascent_m, description)
+def format_filename(
+    distance_km: int,
+    ascent_m: int,
+    description: str,
+    *,
+    units: OutputUnits = OutputUnits.IMPERIAL,
+) -> str:
+    stem = format_stem(distance_km, ascent_m, description, units=units)
     return f"{stem}.gpx"
 
 

@@ -9,7 +9,8 @@ import gpxpy
 
 from gpx_standardiser.description_hints import description_hint_from_original
 from gpx_standardiser.gpx_stats import TrackMetrics, compute_track_metrics
-from gpx_standardiser.naming import DESCRIPTION_MARKER
+from gpx_standardiser.naming import DESCRIPTION_MARKER, format_stem, format_stats_prefix
+from gpx_standardiser.units import OutputUnits
 
 
 @dataclass
@@ -19,19 +20,34 @@ class PlanRow:
     path: Path
     metrics: TrackMetrics
     hint: str
+    units: OutputUnits = OutputUnits.IMPERIAL
 
     def proposed_stem(self) -> str:
-        return (
-            f"{self.metrics.distance_km}km-{self.metrics.ascent_m}m{DESCRIPTION_MARKER}{self.hint}"
-            if self.hint
-            else f"{self.metrics.distance_km}km-{self.metrics.ascent_m}m{DESCRIPTION_MARKER}"
+        if self.hint:
+            return format_stem(
+                self.metrics.distance_km,
+                self.metrics.ascent_m,
+                self.hint,
+                units=self.units,
+            )
+        prefix = format_stats_prefix(
+            self.metrics.distance_km,
+            self.metrics.ascent_m,
+            units=self.units,
         )
+        return f"{prefix}{DESCRIPTION_MARKER}"
 
 
-def plan_row(path: Path, xml_text: str, *, config_file: Path | None = None) -> PlanRow:
+def plan_row(
+    path: Path,
+    xml_text: str,
+    *,
+    config_file: Path | None = None,
+    units: OutputUnits = OutputUnits.IMPERIAL,
+) -> PlanRow:
     metrics = compute_track_metrics(xml_text)
     hint = description_hint_from_original(path.name, config_file=config_file)
-    return PlanRow(path=path, metrics=metrics, hint=hint)
+    return PlanRow(path=path, metrics=metrics, hint=hint, units=units)
 
 
 def apply_description_metadata(xml_text: str, description: str) -> str:

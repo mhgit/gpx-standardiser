@@ -17,3 +17,4 @@ def test_rename_help_lists_destination_flags_not_outbound_files_alias() -> None:
 
     assert "--config" in payload
     assert "-c, --config" in payload
+    assert "--units" in payload
