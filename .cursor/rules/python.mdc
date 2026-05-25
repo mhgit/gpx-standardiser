@@ -1,0 +1,18 @@
+---
+description: Python conventions for gpx_standardiser package
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python
+
+- Source lives under `src/gpx_standardiser/`; mirror tests as `tests/test_<module>.py`.
+- Prefer **typed** public helpers; CLI stays Typer routing / IO only (`cli.py`).
+- Run tests:
+
+```bash
+uv run pytest
+```
+
+- Coverage gate (~80%, `cli.py` omitted): enforced via `[tool.pytest.ini_options]` and `[tool.coverage.*]` in `pyproject.toml`.
+- Use **gpxpy** for GPX I/O rather than bespoke XML traversal where practical.

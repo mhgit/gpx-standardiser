@@ -1,0 +1,22 @@
+---
+description: GPX Standardiser — project intent, ADRs, filesystem rules
+alwaysApply: true
+---
+
+# GPX Standardiser
+
+Club CLI to copy GPX files under a canonical basename pattern:
+
+- Filename pattern and limits: [`docs/adr/0002-filename-format.md`](docs/adr/0002-filename-format.md)
+- Metrics: [`docs/adr/0003-gpx-metrics-calculation.md`](docs/adr/0003-gpx-metrics-calculation.md)
+- CLI and paths: [`docs/adr/0005-cli-and-output-workflow.md`](docs/adr/0005-cli-and-output-workflow.md)
+- Coverage: [`docs/adr/0006-test-coverage.md`](docs/adr/0006-test-coverage.md)
+
+## Rules
+
+- Do not hardcode `inbound-files` / `outbound-files` in code behaviour; callers pass `--route-files`, a positional `.gpx` path, and `--output-folder`.
+- Production flow **copies** renamed files only; never modify source GPXs in place.
+- Internal GPX `<name>` should be description-only (`docs/adr/0004-description-and-metadata.md`).
+- Use **uv** for dependencies and **`uv run pytest`** / **`pytest-cov`** per ADR-0001 and ADR-0006.
+
+Keep scope narrow: CLI only for local files; no third-party uploads API integration.

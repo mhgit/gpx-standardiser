@@ -1,0 +1,59 @@
+[project]
+name = "gpx-standardiser"
+version = "0.1.0"
+description = "Standardise cycling club GPX filenames (distance, ascent, description slug)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "gpxpy>=1.6.2",
+    "pyyaml>=6.0.1",
+    "typer>=0.15.1",
+]
+
+[project.scripts]
+gpx-standardiser = "gpx_standardiser.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gpx_standardiser"]
+
+[tool.hatch.build]
+include = ["src/gpx_standardiser/**/*.py", "src/gpx_standardiser/config/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=gpx_standardiser",
+    "--cov-config=pyproject.toml",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+]
+pythonpath = ["tests"]
+
+[tool.coverage.run]
+source = ["gpx_standardiser"]
+omit = ["*/cli.py"]
+
+[tool.coverage.report]
+fail_under = 80
+
+[dependency-groups]
+dev = ["pytest>=8.4.0", "pytest-cov>=6.0.0", "ruff>=0.14.0"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/gpx_standardiser/cli.py" = ["B008"]
+
+[tool.ruff.format]
+quote-style = "double"

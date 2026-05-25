@@ -1,0 +1,23 @@
+# Tokens listed here are removed from description hints wherever they appear as
+# whole segments after splitting the basename (underscores/spaces/hyphens).
+# Matching is case-insensitive ("to" and "To" behave the same).
+# Quoted list entries avoid YAML 1.1 interpreting words like "on" as booleans.
+# One word per list entry; see ADR-0004.
+- "a"
+- "an"
+- "and"
+- "at"
+- "by"
+- "for"
+- "from"
+- "in"
+- "of"
+- "on"
+- "or"
+- "the"
+- "to"
+- "via"
+- "with"
+# Club-specific segments (matched case-insensitively): e.g. `occ` drops an `OCC`
+# Typical if the club acronym is used in the description.
+- "occ"
