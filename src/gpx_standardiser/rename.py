@@ -28,9 +28,9 @@ class PlanRow:
         )
 
 
-def plan_row(path: Path, xml_text: str) -> PlanRow:
+def plan_row(path: Path, xml_text: str, *, config_file: Path | None = None) -> PlanRow:
     metrics = compute_track_metrics(xml_text)
-    hint = description_hint_from_original(path.name)
+    hint = description_hint_from_original(path.name, config_file=config_file)
     return PlanRow(path=path, metrics=metrics, hint=hint)
 
 

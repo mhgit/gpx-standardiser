@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
@@ -16,11 +17,31 @@ from gpx_standardiser.naming import (
 from gpx_standardiser.rename import plan_row as build_plan_row
 from gpx_standardiser.rename import write_renamed_copy
 
+ConfigPathOption = Annotated[
+    Path | None,
+    typer.Option(
+        "--config",
+        "-c",
+        metavar="YAML",
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+        help=(
+            "Application config (join_words + description_filter). "
+            'Omit to resolve "config/config.yaml" next to pyproject.toml, '
+            "then upward from cwd, then the bundled copy in installs."
+        ),
+    ),
+]
+
+
 _APP_HELP = """Standardise GPX basenames to "<km>km-<ascent>m@<desc>.gpx" (see docs/adr/)."""
 
 _APP_EPILOG = """\
 Use `plan --interactive` (-i) to walk the same prompts as `rename`, then print a report (nothing written).
 For real copies use `rename` with --output-folder / -o, --desc/-d, --force, --non-interactive.
+Optional: -c / --config for application YAML (join_words, description_filter); omit for default discovery.
 
 Examples:
   gpx-standardiser plan --route-files ./inbound-files/
@@ -101,6 +122,7 @@ def plan(
             "still writes no files."
         ),
     ),
+    config_file: ConfigPathOption = None,
 ) -> None:
     """Print distance, ascent, and filename hints — no writes."""
 
@@ -131,7 +153,7 @@ def plan(
             for w in metrics.warnings:
                 typer.echo(f"  warning: {w}")
 
-            hint = description_hint_from_original(path.name)
+            hint = description_hint_from_original(path.name, config_file=config_file)
             picked = _prompt_until_valid_stem(
                 metrics.distance_km,
                 metrics.ascent_m,
@@ -174,7 +196,7 @@ def plan(
     for path in paths:
         try:
             xml = path.read_text(encoding="utf-8")
-            row = build_plan_row(path, xml)
+            row = build_plan_row(path, xml, config_file=config_file)
         except GpxAnalysisError as exc:
             typer.echo(f"{path.name}: ERROR: {exc}")
             continue
@@ -275,6 +297,7 @@ def rename(
             "`--route-files` batches (v1)."
         ),
     ),
+    config_file: ConfigPathOption = None,
 ) -> None:
     """Copy GPX files using the ADR basename pattern and refreshed `<name>` metadata."""
     paths = resolve_input_paths(route_files, gpx_file)
@@ -305,7 +328,7 @@ def rename(
         for w in metrics.warnings:
             typer.echo(f"  warning: {w}")
 
-        hint = description_hint_from_original(path.name)
+        hint = description_hint_from_original(path.name, config_file=config_file)
         chosen_desc: str | None
 
         if desc is not None:

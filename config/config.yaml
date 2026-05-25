@@ -1,0 +1,46 @@
+# Application YAML — hint join words & description-filter tokens (`ADR-0004`).
+# Canonical location on disk: `<project-root>/config/config.yaml` (`ADR-0007`).
+#
+# Root must expose join_words and description_filter (YAML lists of strings).
+
+# Join words are removed wherever they appear as whole basename segments after
+# splitting on _, spaces, and hyphens. Matching is case-insensitive.
+join_words:
+  - "a"
+  - "an"
+  - "and"
+  - "at"
+  - "by"
+  - "for"
+  - "from"
+  - "in"
+  - "of"
+  - "on"
+  - "or"
+  - "the"
+  - "to"
+  - "via"
+  - "with"
+  # Quote entries so YAML 1.1 does not treat words like "on" as booleans.
+  # Club acronym / prefix tokens (whole-token match).
+  - "occ"
+
+# Description-filter tokens: units / ride meta treated as noise (whole-token,
+# case-insensitive); not geographic names. Separate from join_words so units can
+# be tuned without overlapping English joiners. Do not list direction tokens
+# (cw, ccw, clockwise, counterclockwise, etc.) — leaders often upload both
+# directions as separate files and need those words in the description hint.
+description_filter:
+  - "km"
+  - "k"
+  - "kms"
+  - "ml"
+  - "mls"
+  - "miles"
+  - "mile"
+  - "mi"
+  - "m"
+  - "mtrs"
+  - "mtr"
+  - "ft"
+  - "climbing"

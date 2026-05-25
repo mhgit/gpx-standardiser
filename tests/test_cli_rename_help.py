@@ -14,3 +14,6 @@ def test_rename_help_lists_destination_flags_not_outbound_files_alias() -> None:
     assert "--output-folder" in payload
     assert "-o, --output-folder" in payload
     assert "--outbound-files" not in payload
+
+    assert "--config" in payload
+    assert "-c, --config" in payload

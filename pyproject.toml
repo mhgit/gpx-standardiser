@@ -20,8 +20,16 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/gpx_standardiser"]
 
+[tool.hatch.build.targets.sdist.force-include]
+# Mirror repo layout in the sdist so building a wheel from the sdist still finds
+# this path for `wheel.force-include` (Hatchling >= 1.19).
+"config/config.yaml" = "config/config.yaml"
+
+[tool.hatch.build.targets.wheel.force-include]
+"config/config.yaml" = "gpx_standardiser/bundled_config.yaml"
+
 [tool.hatch.build]
-include = ["src/gpx_standardiser/**/*.py", "src/gpx_standardiser/config/*.yaml"]
+include = ["src/gpx_standardiser/**/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

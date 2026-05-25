@@ -1,6 +1,6 @@
 # GPX Standardiser
 
-Club utility to propose **canonical GPX filenames** from each track's **distance** and **ascent**. Decisions live in **[Architecture Decision Records](docs/adr/)**.
+Utility to propose **canonical GPX filenames** from each track's **distance** and **ascent**. Decisions live in **[Architecture Decision Records](docs/adr/)**.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ Basename pattern:
 {km}km-{ascent_m}m@{description}.gpx
 ```
 
-`@` separates the measurable prefix (`NNNkm-MMMm`) from the descriptive slug—a shell‑friendlier convention than experimenting with punctuation like `^`. Some club hosts show only part of long names in their UI; the tool does **not** cap length—you can still keep descriptions short by convention. If **`rename`** would write two identical basenames in one run, successive files become ``stem-2.gpx``, ``stem-3.gpx``, … (`ADR-0002`).
+`@` separates the measurable prefix (`NNNkm-MMMm`) from the descriptive slug. Some filesystem UI only show limited chars from the filename; the tool does **not** cap manually keep descriptions short by convention. If **`rename`** would write two identical basenames in one run, successive files become ``stem-2.gpx``, ``stem-3.gpx``, … (`ADR-0002`).
 
 The description slug becomes the GPX **`name`** (flattened `<metadata>/<trk>` field in `gpxpy`) so head units show something short while distance/ascent stay in geometry (`ADR-0004`).
 
@@ -32,7 +32,7 @@ Exactly **one** input mode per invocation:
 | Directory | `--route-files <DIR>` scans `*.gpx` alphabetically |
 | Single file | `FILE.gpx` positional |
 
-`rename` adds disk-related controls; `plan` can use **`--interactive` / `-i`** for the same prompts without writing (`rename -h` for copy options):
+`rename` Perform disk actions; `plan` can use **`--interactive` / `-i`** for a _dry run_ without writing (`rename -h` for copy options):
 
 | Scope | Flag | Purpose |
 |------|------|---------|
@@ -61,7 +61,11 @@ uv run gpx-standardiser rename ./ride.gpx -o ./outbound-files/ -d 'Tea-Room-Tour
 
 ## Configuration
 
-Join words for hint cleanup live in **`src/gpx_standardiser/config/join_words.yaml`** (YAML list of quoted strings; quote words like `on` so PyYAML does not treat them as booleans). Words are matched **case-insensitively** as **whole** basename segments (`_`, spaces, `-` separators); they are dropped **wherever they appear**. In the rare case a real place reads like a join word, type it again at the prompt. The file must ship with the install or the CLI errors on startup.
+Application YAML **`config.yaml`** drives description hints (**`ADR-0004`**). Canonical copy in Git: **`config/config.yaml`** next to **`pyproject.toml`** — keys **`join_words:`** (English joiners, club acronym tokens such as **`occ`**) and **`description_filter:`** (unit/meta noise). Matching is **case-insensitive**, **whole basename segments** only (`_`, spaces, hyphen splits). Tune direction words sparingly (**`ADR-0004`** commentary in the sample file).
+
+**Discovery** when the CLI loads config (**`ADR-0007`**): by default it resolves **`config/config.yaml`** via checkout layout (**`pyproject.toml`** sibling), walking upward from **`cwd`**, then **`bundled_config.yaml`** in wheels. Pass **`-c`** / **`--config`** on **`plan`** or **`rename`** to use a different YAML file.
+
+Incorrect or missing YAML causes startup failure once config is parsed.
 
 ## Trial workflow (`ADR-0005`)
 
@@ -73,19 +77,10 @@ Join words for hint cleanup live in **`src/gpx_standardiser/config/join_words.ya
 
 ### Notes & caveats
 
-- **Elevations / ascent**: the tool sums **gain on a smoothed** elevation trace (moving average, eleven samples; see **`ADR-0003`**), avoiding the inflation you get by summing every raw `<ele>` bump on dense barometer tracks. Garmin Connect remains a **benchmark**, not ground truth—it may report **above or below** our number on the same file (often tens of metres, depending on route and Garmin’s corrections). Prefer our value for **consistent club filenames**, not handset debates.
-- **Legacy filenames**: some downloads still embed `…^PlaceName`; quote them until you rerun `rename`.
+- **Elevations / ascent**: the tool sums **gain on a smoothed** elevation trace (moving average, eleven samples; see **`ADR-0003`**), avoiding the inflation you get by summing every raw `<ele>` bump on dense barometer tracks. Benchmarking against common online GPX tooling we found the approximation sufficient for the purposes of gauging route difficulty.  The script may report **above or below** our number on the same file (often tens of metres, depending on route and another systems corrections).
 - **`inbound-files/` / `outbound-files/`**: intentionally gitignored; always pass folders via CLI per `ADR-0005`.
 
-## Development
+## Contributing
 
-**Repository slug:** The PyPI package and CLI stay `gpx-standardiser`. If you want a different **GitHub repo name**, rename only the checkout folder before `gh repo create` (no code changes needed).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks (Ruff, pytest) and the fork / pull request workflow.
 
-```bash
-uv sync
-uv run ruff check .
-uv run ruff format --check .
-uv run pytest     # Coverage gate enforced in pyproject.toml
-```
-
-CI runs on push and pull request to `main` (see `.github/workflows/ci.yml`).

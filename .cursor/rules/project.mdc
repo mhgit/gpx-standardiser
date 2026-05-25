@@ -10,6 +10,7 @@ Club CLI to copy GPX files under a canonical basename pattern:
 - Filename pattern and limits: [`docs/adr/0002-filename-format.md`](docs/adr/0002-filename-format.md)
 - Metrics: [`docs/adr/0003-gpx-metrics-calculation.md`](docs/adr/0003-gpx-metrics-calculation.md)
 - CLI and paths: [`docs/adr/0005-cli-and-output-workflow.md`](docs/adr/0005-cli-and-output-workflow.md)
+- App config YAML: [`docs/adr/0007-application-config-location.md`](docs/adr/0007-application-config-location.md)
 - Coverage: [`docs/adr/0006-test-coverage.md`](docs/adr/0006-test-coverage.md)
 
 ## Rules

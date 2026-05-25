@@ -40,7 +40,7 @@ def test_hint_strips_leading_joining_to() -> None:
 
 
 def test_hint_strips_occ_prefix_and_infix_to() -> None:
-    # OCC (Oxted Cycling Club filename prefix, join_words.yaml) plus joiner "to"
+    # OCC (Club filename prefix from config.yaml join_words) plus joiner "to"
     assert description_hint_from_original("OCC_to_Tea_Pot_60_miles.gpx") == "Tea-Pot"
 
 
