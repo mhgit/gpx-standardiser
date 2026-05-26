@@ -21,6 +21,8 @@ class TrackMetrics:
 
     distance_km: int
     ascent_m: int
+    distance_m: float = 0.0
+    ascent_m_exact: float = 0.0
     warnings: list[str] = field(default_factory=list)
 
 
@@ -142,6 +144,13 @@ def compute_track_metrics(xml_text: str) -> TrackMetrics:
         )
 
     for_smoothing = smooth_elevation_moving_average(elevations)
-    ascent = int(round(total_ascent_metres(for_smoothing)))
+    ascent_exact = total_ascent_metres(for_smoothing)
+    ascent = int(round(ascent_exact))
 
-    return TrackMetrics(distance_km=distance_km, ascent_m=ascent, warnings=list(warnings))
+    return TrackMetrics(
+        distance_km=distance_km,
+        ascent_m=ascent,
+        distance_m=dist_m,
+        ascent_m_exact=ascent_exact,
+        warnings=list(warnings),
+    )

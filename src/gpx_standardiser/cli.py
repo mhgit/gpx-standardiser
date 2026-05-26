@@ -14,6 +14,7 @@ from gpx_standardiser.naming import (
     allocate_unique_gpx_basename,
     format_stem,
 )
+from gpx_standardiser.plan_report import build_plan_report_rows, format_plan_report_csv
 from gpx_standardiser.rename import plan_row as build_plan_row
 from gpx_standardiser.rename import write_renamed_copy
 from gpx_standardiser.units import OutputUnits, metrics_headline
@@ -98,6 +99,7 @@ def resolve_input_paths(route_files: str | None, gpx_path: Path | None) -> list[
 
 _PLAN_EPILOG = (
     "Writes nothing. Try --interactive / -i to confirm descriptions like `rename`, then print a report. "
+    "Use --report-csv for a metrics table on stdout (non-interactive batch only). "
     'Destination folder is `rename` only (-o / --output-folder). Say "rename -h".'
 )
 
@@ -135,10 +137,23 @@ def plan(
     ),
     config_file: ConfigPathOption = None,
     units: UnitsOption = OutputUnits.IMPERIAL,
+    report_csv: bool = typer.Option(
+        False,
+        "--report-csv",
+        help="Print a CSV metrics report to stdout (non-interactive; incompatible with -i).",
+    ),
 ) -> None:
     """Print distance, ascent, and filename hints — no writes."""
 
     paths = resolve_input_paths(route_files, gpx_file)
+
+    if report_csv and interactive:
+        raise typer.BadParameter("`--report-csv` cannot be combined with `--interactive`.")
+
+    if report_csv:
+        rows = build_plan_report_rows(paths)
+        typer.echo(format_plan_report_csv(rows), nl=False)
+        return
 
     if interactive:
         typer.echo(
