@@ -106,3 +106,7 @@ Incorrect or missing YAML causes startup failure once config is parsed.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks (Ruff, pytest) and the fork / pull request workflow.
 
+## License
+
+MIT — see [License.md](License.md).
+
