@@ -108,5 +108,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks (Ruff, pytest) and the f
 
 ## License
 
-MIT — see [License.md](License.md).
-
+See [LICENSE.md](LICENSE.md).
