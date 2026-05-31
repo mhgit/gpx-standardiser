@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "gpxpy>=1.6.2",
     "pyyaml>=6.0.1",
-    "typer>=0.15.1",
+    "typer>=0.26.4",
 ]
 
 [project.scripts]
@@ -50,7 +50,7 @@ omit = ["*/cli.py"]
 fail_under = 80
 
 [dependency-groups]
-dev = ["pytest>=8.4.0", "pytest-cov>=6.0.0", "ruff>=0.14.0"]
+dev = ["pytest>=8.4.0", "pytest-cov>=6.0.0", "ruff>=0.15.15"]
 
 [tool.ruff]
 line-length = 100
