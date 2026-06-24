@@ -1,6 +1,7 @@
 .venv/
 inbound-files/
 outbound-files/
+outbound-tt/
 __pycache__/
 *.py[cod]
 .pytest_cache/
