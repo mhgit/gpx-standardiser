@@ -16,10 +16,17 @@ uv sync
 Basename pattern:
 
 ```text
-{km}km-{ascent_m}m@{description}.gpx
+{distance}{unit}-{ascent}{unit}@{description}.gpx
 ```
 
-`@` separates the measurable prefix (`NNNkm-MMMm`) from the descriptive slug. Some filesystem UI only show limited chars from the filename; the tool does **not** cap manually keep descriptions short by convention. If **`rename`** would write two identical basenames in one run, successive files become ``stem-2.gpx``, ``stem-3.gpx``, … (`ADR-0002`).
+Units follow **`--units`**, which defaults to **imperial**:
+
+| `--units` | Example basename |
+|-----------|------------------|
+| `imperial` (default) | `053mls-1234ft@Tea-Room-Tour.gpx` |
+| `metric` | `085km-376m@Tea-Room-Tour.gpx` |
+
+`@` separates the measurable prefix (`NNNmls-MMMMft`, or `NNNkm-MMMm` under `--units metric`) from the descriptive slug. Distance is zero-padded to at least three digits so hosts that sort filenames lexicographically list rides in distance order. Some filesystem UI only show limited chars from the filename; the tool does **not** cap the length — keep descriptions short by convention. If **`rename`** would write two identical basenames in one run, successive files become ``stem-2.gpx``, ``stem-3.gpx``, … (`ADR-0002`).
 
 The description slug becomes the GPX **`name`** (flattened `<metadata>/<trk>` field in `gpxpy`) so head units show something short while distance/ascent stay in geometry (`ADR-0004`).
 
@@ -42,6 +49,7 @@ Exactly **one** input mode per invocation:
 | `rename` | `--desc`, `-d` | Fixed description (needs exactly **one** input GPX) |
 | `rename` | `--force`, `-f` | Overwrite a destination basename collision |
 | `rename` | `--non-interactive` | Skips prompts; forbid `--route-files` batches in **v1** |
+| both | `--units` | `imperial` (default) or `metric` for filenames and prompts (`ADR-0002`) |
 
 `plan -i` shows the same ``stem-2.gpx``, ``stem-3.gpx`` numbering for duplicates **within that preview**, but does not scan any output directory for clashes. **`rename`** into a chosen folder respects existing files (skip unless **`--force`**, per-file).
 
@@ -79,7 +87,7 @@ Pipe stdout to a file (see example above). Each row is one input GPX; metrics co
 | `Rank` | Order within **this run only**: **1 = hardest** (highest `m_per_km`). Ties share a rank. Empty if the row errored. |
 | `Error` | Set when the file could not be analysed (e.g. missing track or elevation); metric columns are blank. |
 
-Imperial and metric distance/climb columns are **always** emitted (independent of `--units`, which only affects filename previews elsewhere).
+Imperial and metric distance/climb columns are **always** emitted (independent of `--units`, which elsewhere affects filenames and interactive prompts only).
 
 ## Configuration
 
