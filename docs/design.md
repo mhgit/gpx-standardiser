@@ -52,8 +52,8 @@ flowchart LR
 | `cli.py` | Typer routing and I/O only |
 | `gpx_stats.py` | Haversine distance, smoothed ascent (`ADR-0003`) |
 | `description_hints.py` | Basename → suggested description slug (`ADR-0004`) |
-| `naming.py` | Canonical `{km}km-{m}m@{desc}.gpx` stem |
-| `units.py` | Imperial/metric display and filename rounding |
+| `naming.py` | Canonical `{dist}{unit}-{ascent}{unit}@{desc}.gpx` stem (`ADR-0002`) |
+| `units.py` | Imperial (default) / metric display and filename rounding |
 | `plan_report.py` | CSV rows for `plan --report-csv` |
 | `ride_difficulty.py` | m/km, grade %, tier labels, batch rank |
 | `rename.py` | Copy renamed GPX; duplicate stem numbering |
