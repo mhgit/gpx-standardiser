@@ -50,7 +50,7 @@ omit = ["*/cli.py"]
 fail_under = 80
 
 [dependency-groups]
-dev = ["pytest>=9.1.1", "pytest-cov>=6.0.0", "ruff>=0.16.1"]
+dev = ["pytest>=9.1.1", "pytest-cov>=6.0.0", "ruff>=0.16.2"]
 
 [tool.ruff]
 line-length = 100
